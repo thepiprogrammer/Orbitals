@@ -26,53 +26,60 @@ earth_object = pygame.image.load('earth.jpg')
 scale_earth = 50
 earth_scale_x, earth_scale_y = scale_earth, scale_earth
 earth_object = pygame.transform.scale(earth_object, (earth_scale_x, earth_scale_y))
-earth_x, earth_y = 300, 100
-min_x, min_y, max_x, max_y = 300, 100, length-earth_scale_x*1.2*5, width-earth_scale_y*1.2*8/3
-direction = 'right'
-speed_earth = 10
+a_earth, b_earth = 400, 200
+sideways_earth = 550
+depth_earth = 250 # how far below the title bar the orbit occurs
+earth_x, earth_y = 0, -b_earth # initial values
+quad_earth = 0
+speed_earth = 5
+g_earth = gcd(a_earth**2, b_earth**2)
 
 #defining moon object
 moon_object = pygame.image.load('moon.png')
 scale_moon = int(round(scale_earth/6))
 moon_scale_x, moon_scale_y = scale_moon, scale_moon
 moon_object = pygame.transform.scale(moon_object, (moon_scale_x, moon_scale_y))
-a, b = 200, 100
-sideways = 400
-depth = 300 # how far below the title bar the orbit occurs
+a, b = 70, 70
+# sideways = 400
+# depth = 300 # how far below the title bar the orbit occurs
 moon_x, moon_y = 0, -b # initial values
 quad = 0
-speed_moon = 10
+speed_moon = 5
 g = gcd(a**2, b**2)
 
 while True: # the main game loop	
-	DISPLAYSURF.fill(WHITE)
-	pygame.draw.rect(DISPLAYSURF, 0x000000, (400, 300, 10, 10))
+	DISPLAYSURF.fill(0x708090)
+	# pygame.draw.rect(DISPLAYSURF, 0x000000, (400, 300, 10, 10))
 
 	# defines earth of the nth weird dimention
-	if direction == 'right':
+	if abs(earth_x) == a_earth or abs(earth_x) == 0:
+		if quad_earth < 4 :
+			quad_earth += 1 
+		else:
+			quad_earth = 1
+
+	if quad_earth in [1, 4]:
 		earth_x += speed_earth
-		if earth_x >= max_x:
-			direction = 'down'
-	elif direction == 'down':
-		earth_y += speed_earth
-		if earth_y >= max_y:
-			direction = 'left'
-	elif direction == 'left':
+	else:
 		earth_x -= speed_earth
-		if earth_x <= min_x:
-			direction = 'up'
-	elif direction == 'up':
-		earth_y -= speed_earth
-		if earth_y <= min_y:
-			direction = 'right'
-	
-	DISPLAYSURF.blit(earth_object, (earth_x, earth_y))
+	earth_y = (((a_earth**2*b_earth**2)/g_earth - (b_earth**2/g_earth)*(earth_x**2))/(a_earth**2/g_earth))**0.5
+	if quad_earth in [2, 3]:
+		earth_y = abs(earth_y)*-1
+	else:
+		earth_y = abs(earth_y)
+	# print(earth_x, earth_y, quad_earth, b_earth**2/g_earth)
+	x_base = sideways_earth + earth_x - scale_earth/2
+	y_base = depth_earth - earth_y + scale_earth/2
+	try:
+		DISPLAYSURF.blit(earth_object, (x_base, y_base))
+	except TypeError:
+		None
 	### Earth object ends here
 
 	#defines moon of the nth weird dimention
-	sideways = earth_x
-	depth = earth_y
-	
+	sideways = x_base
+	depth = y_base
+
 	if abs(moon_x) == a or abs(moon_x) == 0:
 		if quad < 4 :
 			quad += 1 
